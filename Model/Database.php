@@ -29,6 +29,19 @@ class Database
         }
         return false;
     }
+
+    public function create($query = ""){
+        try{
+         $stmt = $this->executeStatement($query);
+         $result = $stmt->get_result()->fetch_row(MYSQLI_ASSOC);
+         $stmt->close();
+
+         return $result;
+        }catch(Exception $e){
+            throw New Exception( $e->getMessage() );
+        }
+        return false;
+    }
  
     private function executeStatement($query = "" , $params = [])
     {
