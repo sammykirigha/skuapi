@@ -49,10 +49,8 @@ class ProductController extends BaseController
 		$requestMethod = $_SERVER["REQUEST_METHOD"];
 		$productModel = new ProductModel();
 
-		echo strtoupper($requestMethod);
-
 		try {
-			if (strtoupper($requestMethod) == 'delete') {
+			if (strtoupper($requestMethod) == 'DELETE') {
 				$productModel->deleteSelectedProducts($sku);
 				$responseData = json_encode("deleted successfully ");
 			} else {
@@ -63,18 +61,6 @@ class ProductController extends BaseController
 			throw new Exception($e->getMessage());
 		}
 
-		// send output
-		if (!$strErrorDesc) {
-			$this->sendOutput(
-				$responseData,
-				array('Content-Type: application/json', 'HTTP/1.1 200 OK')
-			);
-		} else {
-			$this->sendOutput(
-				json_encode(array('error' => $strErrorDesc)),
-				array('Content-Type: application/json', $strErrorHeader)
-			);
-		}
 	}
 
 	public function createProducts()
@@ -90,23 +76,36 @@ class ProductController extends BaseController
 				$length = null;
 				$height = null;
 				$size = null;
+				$sku ="";
+				$name ="";
+				$price ="";
 
-				$sku = $_POST["sku"];
-				$name = $_POST["name"];
-				$price = $_POST["price"];
+				$input = (array) json_decode(file_get_contents('php://input'), TRUE);
+				if (! $this->validatePost($input)) {
+					return $this->unprocessableEntityResponse();
+				}
 
-				if (isset($_POST["weight"]))
-					$weight = $_POST["weight"];
-				if (isset($_POST["width"]))
-					$width = $_POST["width"];
-				if (isset($_POST["length"]))
-					$length = $_POST["length"];
-				if (isset($_POST["height"]))
-					$height = $_POST["height"];
-				if (isset($_POST["size"]))
-					$size = $_POST["size"];
+				
+
+				if (isset($input["sku"]))
+					$sku = $input["sku"];
+				if (isset($input["name"]))
+					$name = $input["name"];
+				if (isset($input["price"]))
+					$price = $input["price"];
+				if (isset($input["weight"]))
+					$weight = $input["weight"];
+				if (isset($input["width"]))
+					$width = $input["width"];
+				if (isset($input["length"]))
+					$length = $input["length"];
+				if (isset($input["height"]))
+					$height = $input["height"];
+				if (isset($input["size"]))
+					$size = $input["size"];
 
 				$productModel->createProduct($name, $size, $price, $weight, $width, $length, $sku, $height);
+				
 				$responseData = json_encode("product created");
 				if (!$responseData) {
 					return json_decode("sku must be unique");
@@ -119,26 +118,27 @@ class ProductController extends BaseController
 			throw new Exception($e->getMessage());
 		}
 
-
-		// send output
-		if (!$strErrorDesc) {
-			$this->sendOutput(
-				$responseData,
-				array('Content-Type: application/json', 'HTTP/1.1 200 OK')
-			);
-		} else {
-			$this->sendOutput(
-				json_encode(array('error' => $strErrorDesc)),
-				array('Content-Type: application/json', $strErrorHeader)
-			);
-		}
 	}
 
-	function test_input($data)
+
+	private function validatePost($input)
 	{
-		$data = trim($data);
-		$data = stripslashes($data);
-		$data = htmlspecialchars($data);
-		return $data;
+		if (! isset($input['sku'])) {
+		return false;
+		}
+		if (! isset($input['name'])) {
+		return false;
+		}
+
+		return true;
 	}
+
+	  private function unprocessableEntityResponse()
+		{
+			$response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
+			$response['body'] = json_encode([
+			'error' => 'Invalid input'
+			]);
+			return $response;
+		}
 }

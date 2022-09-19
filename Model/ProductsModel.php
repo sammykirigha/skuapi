@@ -16,6 +16,6 @@ class ProductModel extends Database
 
     public function getProducts($limit)
     {
-        return $this->select("SELECT * FROM products ORDER BY sku ASC LIMIT ?", ["i", $limit]);
+        return $this->select("SELECT * FROM products ORDER BY id ASC LIMIT ?", ["i", $limit]);
     }
 }
