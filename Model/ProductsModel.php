@@ -3,13 +3,19 @@ require_once PROJECT_ROOT_PATH . "/Model/Database.php";
 
 class ProductModel extends Database
 {
-    public function createProduct($name,$size, $price, $weight, $width, $length, $sku )
+    public function createProduct($name, $size, $price, $weight, $width, $length, $sku, $height)
     {
-          return $this->create("insert into products (name, size, price, weight, width, length) values ('$name', '$size', '$price', '$weight', '$width', '$length', '$sku)");
+        return $this->create("insert into products (name, size, price, weight, width, length, sku,  height) values ('$name', '$size', '$price', '$weight', '$width', '$length', '$sku', '$height' )");
     }
 
-	 public function getProducts($limit)
+    public function deleteSelectedProducts($sku)
     {
-        return $this->select("SELECT * FROM products ORDER BY user_id ASC LIMIT ?", ["i", $limit]);
+        $query = "DELETE FROM products WHERE sku = '$sku'";
+        return $this->delete($query);
+    }
+
+    public function getProducts($limit)
+    {
+        return $this->select("SELECT * FROM products ORDER BY sku ASC LIMIT ?", ["i", $limit]);
     }
 }
